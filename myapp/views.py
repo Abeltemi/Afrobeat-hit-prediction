@@ -92,7 +92,7 @@ def dataprocessing(dataset, model):
     # data_asarray = np.asarray(data_asarray)
     print(data_asarray)
     reshaped_X = data_asarray.reshape(1, -1)
-    print(reshaped_X, type(reshaped_X))
+    # print(reshaped_X, type(reshaped_X))
     pred = model.predict(reshaped_X)
     
     return pred
@@ -135,7 +135,7 @@ def data_extraction_from_user(request):
         data = []
         for keys, values in features.items():
             data.append(values)
-        print(data)
+        # print(data)
         # data_ = np.asarray(data).reshape(1, -1)
         # std = StandardScaler()
         # std.fit(data_)
@@ -143,7 +143,7 @@ def data_extraction_from_user(request):
         # print(scaler_data[0][0])
         
         data_asarray = np.asarray(data)
-        print(data_asarray.shape)
+        # print(data_asarray.shape)
         reshape_data = data_asarray.reshape(1, -1)
         print(reshape_data)
         preds = model.predict(reshape_data)
