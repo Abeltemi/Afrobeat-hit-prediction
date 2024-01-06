@@ -7,7 +7,7 @@ import joblib
 from sklearn.preprocessing import StandardScaler
 
 
-model_file_path = 'D:/Afrobeat_project/afrobeat_music_hit_prediction/afrobeat_predict/models/radomF.pkl'
+model_file_path = 'D:/Afrobeat_project/afrobeat_music_hit_prediction/afrobeat_predict/models/radomF_Mod.pkl'
 # Create your views here.
 model = joblib.load(filename=model_file_path)
 print(model)
@@ -146,12 +146,13 @@ def data_extraction_from_user(request):
         print(data_asarray.shape)
         reshape_data = data_asarray.reshape(1, -1)
         print(reshape_data)
-        
-        pred = model.predict(reshape_data)
+        preds = model.predict(reshape_data)
+        print(preds)
+        pred = None
         # pred = dataprocessing(X_test, model)
-        if pred == [0]:
-            pred = "This is will likely not going to hit!"
-        else:
+        if preds == [1]:
             pred = 'This is will hit!'
-       
-    return render(request, 'myapp/form.html', {'feature_list': feature_list, 'pred':pred})
+        else:
+            pred = "This is will likely not going to hit!"
+        return render(request,'myapp/form.html', {'pred':pred})
+    return render(request, 'myapp/form.html', {'feature_list': feature_list})
