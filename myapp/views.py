@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .forms import UploadAudioForm
 import pandas as pd
 import numpy as np
@@ -10,12 +10,72 @@ from sklearn.preprocessing import StandardScaler
 model_file_path = 'D:/Afrobeat_project/afrobeat_music_hit_prediction/afrobeat_predict/models/radomF_Mod.pkl'
 # Create your views here.
 model = joblib.load(filename=model_file_path)
-print(model)
+# print(model)
+def home_page(request):
+    feature_list = ['danceability', 'energy', 'tempo', 'valence', 'acousticness', 'liveness', 'loudness', 'duration', 'instrumentalness',
+                    'key', 'mode', 'speechiness', 'time_signature']
+    if request.method == 'POST':
+        danceability = float(request.POST.get('danceability'))
+        energy = float(request.POST.get('energy'))
+        tempo = float(request.POST.get('tempo'))
+        valence = float(request.POST.get('valence'))
+        acousticness = float(request.POST.get('acousticness'))
+        liveness = float(request.POST.get('liveness'))
+        loudness = float(request.POST.get('loudness'))
+        duration = int(request.POST.get('duration'))
+        instrumentalness = float(request.POST.get('instrumentalness'))
+        key = int(request.POST.get('key'))
+        mode = int(request.POST.get('mode'))
+        speechiness = float(request.POST.get('speechiness'))
+        time_signature = int(request.POST.get('time_signature'))
+        
+        features = {
+        'danceability': danceability,
+        'energy': energy,
+        'tempo': tempo,
+        'valence': valence,
+        'acousticness': acousticness,
+        'liveness': liveness,
+        'loudness': loudness,
+        'duration_ms': duration,
+        'instrumentalness': instrumentalness,
+        'key': key,
+        'mode': mode,
+        'speechiness': speechiness,
+        'time_signature': time_signature,
+        }
+        # df = pd.DataFrame(features, index=[0])
+        data = []
+        for keys, values in features.items():
+            data.append(values)
+        # print(data)
+        # data_ = np.asarray(data).reshape(1, -1)
+        # std = StandardScaler()
+        # std.fit(data_)
+        # scaler_data = std.transform(data_)
+        # print(scaler_data[0][0])
+        
+        data_asarray = np.asarray(data)
+        # print(data_asarray.shape)
+        reshape_data = data_asarray.reshape(1, -1)
+        print(reshape_data)
+        preds = model.predict(reshape_data)
+        print(preds)
+        pred = None
+        # pred = dataprocessing(X_test, model)
+        if preds == [1]:
+            pred = 'This will be a hit!'
+        else:
+            pred = "This will likely not be a hit!"
+        return redirect('result', pred=pred)
+    return render(request, 'myapp/home.html', {'feature_list': feature_list})
+
 def upload_audio(request):
     form = UploadAudioForm()
     if request.method == 'POST':
         form = UploadAudioForm(request.POST, request.FILES)
         if form.is_valid():
+            print("Form is valid. Processing...")
             title = form.cleaned_data['title']
             audio_file = form.cleaned_data['audio_file']
             
@@ -28,10 +88,7 @@ def upload_audio(request):
             else:
                 print("It will hit")
                 prediction = "Your AfroBeat Will shake the world of United Kingdom!"
-                
-        else:
-            form = UploadAudioForm()
-        return render(request, 'myapp/index.html', {'form': form, 'prediction':prediction, 'title':title})
+            return render(request, 'myapp/result.html', {'prediction':prediction, 'title':title})   
     return render(request, 'myapp/index.html', {'form': form})
 
 
@@ -151,8 +208,16 @@ def data_extraction_from_user(request):
         pred = None
         # pred = dataprocessing(X_test, model)
         if preds == [1]:
-            pred = 'This is will hit!'
+            pred = 'This will be a hit!'
         else:
-            pred = "This is will likely not going to hit!"
+            pred = "This will likely not be a hit!"
         return render(request,'myapp/form.html', {'pred':pred})
     return render(request, 'myapp/form.html', {'feature_list': feature_list})
+
+
+def result(request, pred):
+    return render(request, 'myapp/result.html', {'pred':pred})
+
+
+def audio_result(request, prediction, title):
+    return render(request, 'myapp/result.html', {'title':title, 'prediction':prediction})
